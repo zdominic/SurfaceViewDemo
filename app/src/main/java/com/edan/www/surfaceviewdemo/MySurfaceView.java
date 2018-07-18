@@ -42,7 +42,7 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
         setFocusableInTouchMode(true);
         setZOrderOnTop(true);       //避免黑屏
         //初始化画笔
-        mPaint=new Paint();
+        mPaint = new Paint();
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(6);
         mPaint.setAntiAlias(true);
@@ -71,7 +71,7 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     /**
      * 每30帧刷新一次屏幕
      **/
-    public static final int TIME_IN_FRAME = 100;
+    public static final int TIME_IN_FRAME = 10;
 
     @Override
     public void run() {
@@ -82,7 +82,6 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
             synchronized (mSurfaceHolder) {
                 draw();
             }
-
             /**取得更新结束的时间**/
             long endTime = System.currentTimeMillis();
 
@@ -105,19 +104,24 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private void draw() {
         x += 1;
         y = (int) (100 * Math.sin(x * 2 * Math.PI / 180) + 400);
-
-        mPath.lineTo(x, y);
-
-        try{
+        if (x > getWidth()) {
+            mPath.reset();
+            mPath.moveTo(0, (int) (100 * Math.sin(2 * Math.PI / 180) + 400));
+            x = 0;
+        } else {
+            mPath.lineTo(x, y);
+        }
+        try {
             /**拿到当前画布 然后锁定**/
-            mCanvas=mSurfaceHolder.lockCanvas();//获取Canvas对象进行绘制
+            mCanvas = mSurfaceHolder.lockCanvas();//获取Canvas对象进行绘制
             //SurfaceView背景
             mCanvas.drawColor(Color.GRAY);
-            mCanvas.drawPath(mPath,mPaint);
-        }catch (Exception e){
+
+            mCanvas.drawPath(mPath, mPaint);
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if (mCanvas!=null){
+        } finally {
+            if (mCanvas != null) {
                 /**绘制结束后解锁显示在屏幕上**/
                 mSurfaceHolder.unlockCanvasAndPost(mCanvas);   //保证绘制的画布内容提交
             }
@@ -146,10 +150,12 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     /**
      * 清屏
+     *
      * @return true
      */
-    public boolean reDraw(){
+    public boolean reDraw() {
         mPath.reset();
         return true;
     }
+
 }
